@@ -1,0 +1,94 @@
+name: Bug report
+description: Something is not notifying, rendering, or installing correctly.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Please do not paste tokens, full commands, or
+        private conversation text. Synthetic examples are enough.
+  - type: input
+    id: dsh-version
+    attributes:
+      label: DSH version
+      description: The exact version shown in Settings or in the app.
+      placeholder: 0.2.2-rc.5
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - macOS desktop app
+        - Windows desktop app
+        - Linux desktop app
+        - Browser web UI
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: Install method
+      options:
+        - Plugin manager
+        - dsh plugin / pnpm
+        - Local checkout
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: permission
+    attributes:
+      label: Notification permission
+      options:
+        - Allowed
+        - Not requested
+        - Blocked
+        - Unsupported
+        - Not sure
+    validations:
+      required: true
+  - type: dropdown
+    id: timing
+    attributes:
+      label: Timing mode
+      options:
+        - Only quiet while viewing
+        - Always
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Include what you did in DSH and what you expected.
+      placeholder: |
+        1. Open a conversation...
+        2. Switch to another app...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: Browser console or DSH logs mentioning system-notify, if available.
+      render: text
+    validations:
+      required: false

@@ -1,0 +1,18 @@
+# dsh-system-notify — one Host plugin plus one browser half.
+# The row config is the plugin default. The settings section writes the same
+# fields into the profile's patch layer, which outranks this default.
+- insert:
+    - id: system-notify
+      name: dsh-system-notify
+      config:
+        enabled: true
+        mode: background
+        events:
+          complete: true
+          approval: true
+          authorization: true
+          error: true
+        content:
+          showTitle: true
+          replyPreview: false
+          sound: true

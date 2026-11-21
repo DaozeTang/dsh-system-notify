@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Installation and troubleshooting
+    url: https://github.com/DaozeTang/dsh-system-notify/blob/main/docs/INSTALL.md
+    about: Setup, permissions, upgrades, and common failures.
+  - name: Usage and known limits
+    url: https://github.com/DaozeTang/dsh-system-notify/blob/main/docs/USAGE.md
+    about: Event rules, timing modes, privacy, and limitations.

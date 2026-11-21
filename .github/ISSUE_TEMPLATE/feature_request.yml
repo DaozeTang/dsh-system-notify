@@ -1,0 +1,38 @@
+name: Feature request
+description: Suggest a behavior, event, or integration.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This plugin intentionally stays small. Explain the problem first, then
+        the proposed change, so we can judge whether it belongs here.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is hard or impossible today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: What should the plugin do differently?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+    validations:
+      required: false
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope check
+      options:
+        - label: This does not require network requests or telemetry.
+        - label: This does not add approval actions to notifications.
+        - label: This does not write conversation content to disk.
