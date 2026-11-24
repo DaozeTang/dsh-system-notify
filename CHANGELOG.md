@@ -4,6 +4,33 @@ All notable changes to this project are documented here.
 
 The format follows Keep a Changelog and the project uses semantic versioning.
 
+## [0.4.0] - 2026-11-24
+
+### Changed
+
+- Targets DSH `^0.2.3-alpha.2`. The Browser half now injects `sessions`,
+  `remote`, and `uiSession`, and reads waiting requests from
+  `ctx.uiSession.pendingInteractions`. This fixes the load error
+  `cannot get property "uiSession.sessionStatus" without inject`, which appeared
+  after DSH 0.2.3 moved session status into its own injected service.
+- Session titles come from `displayTitle` (falling back to `title`), and subagent
+  detection follows `parentId`, matching the 0.2.3 Session list contract.
+- Reply previews read the current `assistant/message` shape under `data.message`
+  and still accept the older flat `data.content` shape.
+- Host routes register with `auth: 'required'` and rely on DSH's Web
+  authentication; the removed Connection admission API is no longer used.
+- The settings panel stylesheet travels in the client module metadata
+  (`meta.stylesheets`), so the renderer installs and removes it with the plugin
+  instead of a hand-injected `<style data-plugin-css>` element.
+- The plugin is named **System notifications** in both locales: the Chinese
+  title, settings label, and test-notification title now use the English name.
+  The settings copy itself stays translated.
+
+### Removed
+
+- The `@deepseek-ai/dsh-client-ui-plugin-manager` client dependency; the settings
+  page still appears on the plugin's Plugins-page row through `settings.section`.
+
 ## [0.3.0] - 2026-11-22
 
 ### Added

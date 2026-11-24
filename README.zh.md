@@ -1,18 +1,19 @@
 <div align="center">
   <img src="icon.svg" width="76" height="76" alt="">
-  <h1>DSH 系统提醒</h1>
-  <p>对话完成、等待审批或授权、出错时，用系统通知把你叫回来。</p>
+  <h1>System notifications</h1>
+  <p>DeepSeek Harness 对话完成、等待审批或授权、出错时，用系统通知把你叫回来。</p>
 
   <p>
     <a href="https://github.com/DaozeTang/dsh-system-notify/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/DaozeTang/dsh-system-notify/actions/workflows/ci.yml/badge.svg"></a>
     <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-3DA639.svg"></a>
-    <img alt="DSH 0.2.x" src="https://img.shields.io/badge/DSH-0.2.x-4176E6.svg">
+    <img alt="DSH 0.2.3+" src="https://img.shields.io/badge/DSH-0.2.3%2B-4176E6.svg">
+    <img alt="Node >=24.22.3" src="https://img.shields.io/badge/node-%3E%3D24.22.3-339933.svg">
   </p>
 
   <p>中文 · <a href="README.md">English</a></p>
 </div>
 
-![系统提醒设置分区](docs/screenshots/settings-light-zh.png)
+![System notifications 设置分区](docs/screenshots/settings-light-zh.png)
 
 > 这是一个社区插件，不是 DeepSeek 官方产品。
 
@@ -29,12 +30,12 @@ DSH 适合跑长任务，但人通常会切去写文档、看网页或开会。�
 - **点击回到现场**：聚焦 DSH 并打开对应会话；审批/授权通知会定位到等待中的卡片。
 - **通知里不做审批**：通知只负责把你带回来，允许/拒绝仍然在 DSH 的审批卡里完成。
 - **默认克制**：回复摘要默认关闭，连续完成会合并，连续报错会节流。
-- **原生设置分区**：位于 **设置 → 系统提醒**，使用 DSH 的设计令牌、原生开关和卡片节奏。
+- **原生设置分区**：位于 **设置 → System notifications**，使用 DSH 的设计令牌、原生开关和卡片节奏。
 - **纯本地**：不发网络请求、不埋点、不写会话日志、不新增模型工具。
 
 ## 安装
 
-要求 DSH `>=0.2.1-rc.2 <1.0.0`；开发需要 Node.js 20+。
+要求 DSH `^0.2.3-alpha.2`；开发需要 Node.js 24.22.3+。
 
 ### 从 GitHub 安装
 
@@ -74,7 +75,7 @@ dsh plugin --profile desktop add "file:$(pwd)"
 
 ### 第一次使用
 
-1. 打开 **设置 → 系统提醒**。
+1. 打开 **设置 → System notifications**。
 2. 点 **允许通知**，并在系统里允许 DSH。
    - macOS：系统设置 → 通知 → DeepSeek Harness。
    - Web：浏览器站点设置。
@@ -83,7 +84,7 @@ dsh plugin --profile desktop add "file:$(pwd)"
 
 ## 配置
 
-设置 → 系统提醒。更改立即保存。左侧边栏 **插件** 页只负责启用和卸载，具体偏好都移到了这个设置分区。
+设置 → System notifications。更改立即保存。左侧边栏 **插件** 页只负责启用和卸载，具体偏好也出现在插件行的同一个设置页里。
 
 | 分组 | 设置 | 默认 |
 | --- | --- | --- |
@@ -111,8 +112,10 @@ dsh plugin --profile desktop add "file:$(pwd)"
 ## 实现
 
 Host 半侧监听 `session/event`，在内存里保留最近一次 `turn/end` 的原因，从而区分
-完成、中止、拦截和失败；Browser 半侧监听会话状态和待处理交互，同时判断焦点和
-当前查看的会话，再调用系统通知。详见 [设计文档](docs/DESIGN.md)（英文）。
+完成、中止、拦截和失败；Browser 半侧注入 `sessions`、`uiSession` 与 `remote`，
+跟随 `uiSession.pendingInteractions` 和 `api-session/status` 事件，同时判断焦点和
+当前查看的会话，再调用系统通知。Host 路由由 DSH 的 Web 认证放行。
+详见 [设计文档](docs/DESIGN.md)（英文）。
 
 ## 隐私
 
@@ -123,8 +126,9 @@ Host 半侧监听 `session/event`，在内存里保留最近一次 `turn/end` �
 
 ## 兼容性
 
-- DSH `0.2.1-rc.2` 到 `0.3.x`（当前在 `0.2.2-rc.5` 验证）。
+- DSH `^0.2.3-alpha.2`（当前在 `0.2.3-alpha.2` 验证）。
 - 桌面端与浏览器版都支持；桌面用系统通知中心，浏览器用站点通知权限。
+- 插件名在中文界面里同样显示为 **System notifications**，界面文案仍随 DSH 语言显示中文。
 - 多客户端各自判断焦点，两个后台客户端可能都提醒；这是 v1 已知限制。
 
 ## 开发

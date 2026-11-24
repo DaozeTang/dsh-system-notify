@@ -1,11 +1,11 @@
 {
   "meta": {
-    "title": "系统提醒",
+    "title": "System notifications",
     "description": "对话完成、需要审批、需要授权或出错时，用系统通知把你叫回来。只在正在查看对应会话时保持安静，也可以选择始终提醒。",
     "detail": "docs/PLUGIN.zh.md"
   },
-  "settings.nav": "系统提醒",
-  "settings.title": "系统提醒",
+  "settings.nav": "System notifications",
+  "settings.title": "System notifications",
   "settings.intro": "选择 DSH 什么时候提醒你，以及每条通知里包含什么。",
   "section.timing": "提醒时机",
   "section.timingDesc": "选择什么时候把 DSH 叫回你的注意力。",
@@ -92,7 +92,7 @@
   "notify.errorPlain": "对话出错",
   "notify.errorBody": "本轮没有完成，点击查看详情。",
   "notify.untitled": "未命名对话",
-  "notify.testTitle": "测试通知 · 系统提醒",
+  "notify.testTitle": "测试通知 · System notifications",
   "notify.testBody": "这是一条测试通知。点击回到 DSH。",
   "notify.open": "打开对话"
 }

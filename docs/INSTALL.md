@@ -4,9 +4,9 @@
 
 ## Requirements
 
-- DeepSeek Harness `0.2.1-rc.2` or newer, below `1.0.0`.
+- DeepSeek Harness `^0.2.3-alpha.2` (tested on `0.2.3-alpha.2`).
 - A DSH profile where you can add a bundle (normally `desktop`).
-- Node.js 20+ only for development and tests.
+- Node.js 24.22.3+ for development and tests.
 
 ## Install through the plugin manager
 
@@ -75,7 +75,7 @@ completely and reopen it. A window refresh is not enough.
 
 1. Open **Plugins** in the sidebar and confirm `dsh-system-notify` appears under
    **Installed plugins** with the Host component marked **Running**.
-2. Open **Settings → Notifications**.
+2. Open **Settings → System notifications**.
 3. Click **Allow notifications**.
 4. Click **Send test notification**.
 5. Switch to another conversation, or away from DSH, and let a turn finish.
@@ -117,7 +117,7 @@ Open the printed URL. The plugin follows the profile's language.
 
 | Symptom | Check |
 | --- | --- |
-| No Notifications section | Bundle missing from `dsh.profile.bundles`, or DSH not restarted. |
+| No System notifications section | Bundle missing from `dsh.profile.bundles`, or DSH not restarted. |
 | Settings section is read-only | The profile has no `configEditor` capability. |
 | No notifications | Permission not granted, Focus mode, or the plugin's master switch is off. |
 | Test notification works, completions do not | Timing is **Only quiet while viewing**; switch to another conversation or keep DSH out of focus and try again. |

@@ -15,12 +15,25 @@ test('background mode notifies for a conversation that is not on screen', { time
   }
 
   const rows = {
-    A: { id: 'A', title: 'Conversation A', running: false, retainedBy: { mainView: 1 } },
-    B: { id: 'B', title: 'Conversation B', running: false, retainedBy: {} },
+    A: { id: 'A', displayTitle: 'Conversation A', running: false, retainedBy: { mainView: 1 } },
+    B: { id: 'B', displayTitle: 'Conversation B', running: false, retainedBy: {} },
   }
   let activePanelId = null
   const sessionListeners = new Set()
   const remoteHandlers = {}
+  const pendingListeners = new Set()
+  let pendingSnapshot = new Map()
+  const pendingInteractions = {
+    getSnapshot: () => pendingSnapshot,
+    subscribe(listener) {
+      pendingListeners.add(listener)
+      return function () { pendingListeners.delete(listener) }
+    },
+  }
+  function publishPending(map) {
+    pendingSnapshot = map
+    for (const listener of [...pendingListeners]) listener()
+  }
   const sessions = {
     list: {
       getSnapshot: () => ({ phase: 'ready', ids: Object.keys(rows), byId: rows }),
@@ -90,17 +103,16 @@ test('background mode notifies for a conversation that is not on screen', { time
     await import(pathToFileURL(resolve('client.js')).href + '?gate=' + realNow())
     const plugin = loaded.factory(require)
     const ctx = {
+      sessions,
+      remote: {
+        $on(event, callback) {
+          remoteHandlers[event] = callback
+          return function () {}
+        },
+      },
+      uiSession: { pendingInteractions },
       get(name) {
-        if (name === 'sessions') return sessions
         if (name === 'layout') return layout
-        if (name === 'remote') {
-          return {
-            $on(event, callback) {
-              remoteHandlers[event] = callback
-              return function () {}
-            },
-          }
-        }
         return undefined
       },
       locale: {
@@ -157,6 +169,39 @@ test('background mode notifies for a conversation that is not on screen', { time
     document.hasFocus = () => false
     await finish('B')
     assert.equal(notifications.length, 5, 'a background app notifies the selected session')
+
+    // Pending interactions arrive through ctx.uiSession.pendingInteractions.
+    document.hasFocus = () => true
+    activePanelId = null
+    rows.A.retainedBy = { mainView: 1 }
+    rows.B.retainedBy = {}
+    pushRows()
+    const before = notifications.length
+
+    publishPending(new Map([['B', { key: 'approval-1', kind: 'approval', sessionId: 'B', toolName: 'bash' }]]))
+    await new Promise(resolveWait => realSetTimeout(resolveWait, 40))
+    assert.equal(notifications.length, before + 1, 'an approval in another conversation notifies')
+    assert.match(notifications[before].title, /Waiting for approval/)
+    assert.equal(notifications[before].options.requireInteraction, true)
+
+    publishPending(new Map([['B', { key: 'approval-1', kind: 'approval', sessionId: 'B', toolName: 'bash' }]]))
+    await new Promise(resolveWait => realSetTimeout(resolveWait, 40))
+    assert.equal(notifications.length, before + 1, 'the same pending key does not notify twice')
+
+    publishPending(new Map([['A', { key: 'approval-2', kind: 'approval', sessionId: 'A', toolName: 'bash' }]]))
+    await new Promise(resolveWait => realSetTimeout(resolveWait, 40))
+    assert.equal(notifications.length, before + 1, 'the conversation on screen stays quiet for its own approval')
+
+    rows.C = { id: 'C', displayTitle: 'Subagent', running: false, origin: 'subagent', parentId: 'A', retainedBy: {} }
+    pushRows()
+    publishPending(new Map([['C', { key: 'question-1', kind: 'question', sessionId: 'C' }]]))
+    await new Promise(resolveWait => realSetTimeout(resolveWait, 40))
+    assert.equal(notifications.length, before + 1, 'subagent sessions stay quiet')
+
+    publishPending(new Map([['B', { key: 'question-2', kind: 'plan-review', sessionId: 'B' }]]))
+    await new Promise(resolveWait => realSetTimeout(resolveWait, 40))
+    assert.equal(notifications.length, before + 2, 'a plan review in another conversation notifies')
+    assert.match(notifications[before + 1].title, /Waiting for your authorization/)
   } finally {
     globalThis.setTimeout = realSetTimeout
     Date.now = realNow

@@ -5,7 +5,8 @@
  * Keeps a tiny, memory-only record of the last turn end for every session, so
  * the browser can tell "finished normally" apart from "stopped", "blocked" and
  * "failed" without opening history. It also owns the plugin's config row and
- * the same-origin routes the settings section uses.
+ * the routes the settings section calls. DSH's Web authentication admits
+ * those routes (`auth: 'required'`), so this half carries no admission code.
  *
  * No files are written, no network requests are made, and no session content
  * leaves this process beyond the optional 80-character reply preview.
@@ -207,36 +208,6 @@ function sendJson(res, status, payload) {
 }
 
 /**
- * Ask the connection service whether this request may run at all.
- * @param connection - the composition's connection service.
- * @param req - incoming request (only headers are read).
- * @returns a rejection status, or undefined when admitted.
- */
-function rejectionOf(connection, req) {
-  if (connection === undefined || connection === null) return 503
-  const admit = connection.admit
-  if (typeof admit === 'function') {
-    try {
-      const admission = admit.call(connection, req)
-      if (admission !== null && typeof admission === 'object') {
-        if ('rejection' in admission) return admission.rejection
-        if ('peer' in admission) return undefined
-      }
-      return 503
-    } catch {
-      return 503
-    }
-  }
-  const reject = connection.requestRejection
-  if (typeof reject !== 'function') return 503
-  try {
-    return reject.call(connection, req) ?? undefined
-  } catch {
-    return 503
-  }
-}
-
-/**
  * Validate one session id from a request body.
  * @param value - candidate.
  * @returns the session id.
@@ -254,10 +225,11 @@ function sessionIdOf(value) {
  */
 function previewOfAssistantEvent(event) {
   const data = event?.data
-  const content = Array.isArray(data?.content)
-    ? data.content
-    : Array.isArray(data?.message?.content)
-      ? data.message.content
+  // DSH 0.2.3 nests the message (and its content) under data.message.
+  const content = Array.isArray(data?.message?.content)
+    ? data.message.content
+    : Array.isArray(data?.content)
+      ? data.content
       : []
   const text = content
     .filter(part => part !== null && typeof part === 'object' && part.type === 'text' && typeof part.text === 'string')
@@ -393,12 +365,12 @@ export function apply(ctx, rawConfig) {
       config,
       caps: {
         webServer: ctx.get('webServer') !== undefined,
-        connection: ctx.get('connection') !== undefined,
         configEditor: ctx.get('configEditor') !== undefined,
         events: typeof ctx.on === 'function',
+        authenticatedRoutes: true,
       },
       platform: process.platform,
-      version: '0.3.0',
+      version: '0.4.0',
     }
   }
 
@@ -436,20 +408,17 @@ export function apply(ctx, rawConfig) {
     },
   ]
 
-  ctx.inject(['webServer', 'connection'], (sctx) => {
+  ctx.inject(['webServer'], (sctx) => {
     const server = sctx.get('webServer')
     for (const route of routeTable) {
+      // DSH 0.2.3 admits Web routes through its authentication providers;
+      // `required` keeps these POSTs for an authenticated page only.
       sctx.effect(() => server.register({
         kind: 'exact',
         path: ROUTE_PREFIX + route.path,
+        auth: 'required',
         handler: async (req, res) => {
           try {
-            const rejection = rejectionOf(sctx.get('connection'), req)
-            if (rejection !== undefined) {
-              res.statusCode = rejection
-              res.end()
-              return
-            }
             if (req.method !== 'POST') {
               res.statusCode = 405
               res.setHeader('allow', 'POST')

@@ -36,8 +36,8 @@ Non-goals:
 | Event | Source | Rule |
 | --- | --- | --- |
 | Conversation finished | Host turn/end reason completed | Main sessions only; one per turn. |
-| Approval needed | Client pendingInteraction.kind = approval | One per pending key. |
-| Authorization needed | Client pendingInteraction.kind = question / plan-review | One per pending key. |
+| Approval needed | Client `uiSession.pendingInteractions` kind = approval | One per pending key. |
+| Authorization needed | Client `uiSession.pendingInteractions` kind = question / plan-review | One per pending key. |
 | Error | Host turn/end reason error, or api-session/error without a turn record | Terminal failures only. |
 
 The Host classifies turn/end into completed, aborted, blocked, error, max-tokens,
@@ -97,8 +97,9 @@ Settings panel, plus a matching `settings.section.icon`. It is not a
 `plugins.bundle.config` entry, so the plugin manager page only handles enabling
 and uninstalling the bundle.
 
-The section is a top-level **Notifications** row in Settings (order 20, after the
-built-in pages). It uses the panel's 612px options column, a native 16/24 page
+The section is a top-level **System notifications** row in Settings (order 20,
+after the built-in pages). The same entry renders on the plugin's row on the
+Plugins page. It uses the panel's 612px options column, a native 16/24 page
 title and 14/22 intro, and native `settings-card-fill` / `settings-card-stroke`
 cards. The order inside the page is deliberate:
 
@@ -119,14 +120,14 @@ client applies the patch optimistically and refreshes from the Host on failure.
       session/event -> turn/end classifier -> bounded in-memory map
                        assistant/message   -> optional 80-char preview
 
-      POST /api/system-notify/status   -> config + capabilities
+      POST /api/system-notify/status   -> config + capabilities (auth: required)
       POST /api/system-notify/config   -> configEditor row patch
       POST /api/system-notify/turn-end -> last turn classification
 
     DSH Client
-      api-session/status -
-      api-session/error  -+-> state machine -> quiet gate -> Notification API
-      uiSession.pending  -
+      api-session/status -----
+      api-session/error   ----+-> state machine -> quiet gate -> Notification API
+      uiSession.pendingInteractions -
 
       notification click -> window.focus() + openSession(sessionId)
 
@@ -135,18 +136,24 @@ client applies the patch optimistically and refreshes from the Host on failure.
 - Listens to session/event and keeps the last turn/end per session.
 - Keeps only the most recent assistant text as an optional preview.
 - Bounds the map to 200 sessions and 24 hours.
-- Registers three same-origin POST routes behind DSH's connection fence.
+- Registers three same-origin POST routes; DSH's Web authentication admits them
+  with `auth: 'required'`.
 - Writes only its own config row through configEditor.
 - No files, no network, no session-log writes.
 
 ### Browser
 
-- Seeds session titles from ctx.sessions.list.
-- Tracks running transitions with api-session/status and errors with
-  api-session/error.
-- Reads pendingInteraction from ctx.uiSession rather than intercepting the
+- Injects `slots`, `locale`, `sessions`, `remote`, and `uiSession`; Cordis holds
+  activation until those services exist and unloads the plugin when they leave.
+- Seeds session titles from `ctx.sessions.list` (`displayTitle`, falling back to
+  `title`) and skips subagent rows by `origin` plus `parentId`.
+- Tracks running transitions with `api-session/status` and errors with
+  `api-session/error`.
+- Follows `ctx.uiSession.pendingInteractions` rather than intercepting the
   approval waterfall, so the approval card's own decision chain is untouched.
 - Applies the focus and current-conversation gate and calls the Notification API.
+- Declares its stylesheet in the client module's `meta.stylesheets`, so the
+  renderer installs and removes it with the plugin.
 - Renders the settings section and requests notification permission only from a
   user gesture.
 

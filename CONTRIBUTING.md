@@ -18,8 +18,8 @@ invariants that keep it safe.
 
 Requirements:
 
-- Node.js 20 or newer.
-- DeepSeek Harness 0.2.1-rc.2 or newer for manual testing.
+- Node.js 24.22.3 or newer.
+- DeepSeek Harness 0.2.3-alpha.2 or newer for manual testing.
 
 Clone and test:
 

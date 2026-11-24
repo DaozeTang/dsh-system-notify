@@ -31,9 +31,9 @@ the event cannot notify at that moment, it is dropped rather than queued.
 
 ## Settings
 
-Settings → Notifications. The form is a top-level section in the Settings panel,
-not inside the plugin manager. The plugin page on the sidebar's **Plugins** page
-only enables or removes the bundle.
+Settings → System notifications. The form is a top-level section in the Settings
+panel, and the same page appears on the plugin's row on the sidebar's **Plugins**
+page, which also enables or removes the bundle.
 
 - Master switch.
 - Timing: quiet while viewing, or always.
@@ -46,7 +46,7 @@ the master switch off also closes notifications this client is showing.
 
 ## First run
 
-1. Open **Settings → Notifications**.
+1. Open **Settings → System notifications**.
 2. Click **Allow notifications** and allow DSH in the operating system.
 3. Click **Send test notification**.
 4. Switch to another conversation or away from DSH and let a turn finish.
@@ -84,13 +84,13 @@ DSH page.
   client falls back to session status and error events.
 - The Notification API is best-effort. Browsers may require a user gesture before
   granting permission; use the Allow notifications button in **Settings →
-  Notifications**.
+  System notifications**.
 - If clicking a notification opens DSH but does not raise its window on a
   platform, that is a platform-specific window-focus limitation.
 
 ## Debugging
 
-1. Check the permission row in **Settings → Notifications**.
+1. Check the permission row in **Settings → System notifications**.
 2. Send a test notification.
 3. Check the operating system's notification settings and Focus mode.
 4. Check that the plugin is enabled on the **Plugins** page in the sidebar and

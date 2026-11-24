@@ -4,7 +4,7 @@
     "description": "Get a system notification when a conversation finishes, needs approval or authorization, or fails. Stay quiet only while you are viewing that conversation, or choose always.",
     "detail": "docs/PLUGIN.md"
   },
-  "settings.nav": "Notifications",
+  "settings.nav": "System notifications",
   "settings.title": "System notifications",
   "settings.intro": "Choose when DSH should reach you, and what each notification includes.",
   "section.timing": "When to notify",
@@ -92,7 +92,7 @@
   "notify.errorPlain": "Conversation failed",
   "notify.errorBody": "This turn did not finish. Click for details.",
   "notify.untitled": "Untitled conversation",
-  "notify.testTitle": "Test notification · System Notifications",
+  "notify.testTitle": "Test notification · System notifications",
   "notify.testBody": "This is a test notification. Click to return to DSH.",
   "notify.open": "Open conversation"
 }

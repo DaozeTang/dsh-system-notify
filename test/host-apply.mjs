@@ -31,9 +31,8 @@ function harness(config) {
     logger() { return { warn() {} } },
     get(name) {
       if (name === 'webServer') {
-        return { register(definition) { routes.set(definition.path, definition.handler); return () => {} } }
+        return { register(definition) { routes.set(definition.path, definition); return () => {} } }
       }
-      if (name === 'connection') return { admit() { return { peer: {} } } }
       if (name === 'configEditor') {
         return {
           async edit(_entry, change) { stored = change(stored) },
@@ -54,10 +53,12 @@ function harness(config) {
 }
 
 async function call(harness, path, body) {
-  const handler = harness.routes.get(ROUTE_PREFIX + path)
-  assert.ok(handler, 'route ' + path + ' registered')
+  const definition = harness.routes.get(ROUTE_PREFIX + path)
+  assert.ok(definition, 'route ' + path + ' registered')
+  assert.equal(definition.kind, 'exact')
+  assert.equal(definition.auth, 'required', 'route ' + path + ' needs an authenticated page')
   const res = response()
-  await handler(request(body), res)
+  await definition.handler(request(body), res)
   return JSON.parse(res.body)
 }
 
@@ -67,6 +68,19 @@ test('host routes are registered and status returns defaults', async () => {
   assert.equal(status.ok, true)
   assert.equal(status.value.config.mode, 'background')
   assert.equal(status.value.caps.events, true)
+  assert.equal(status.value.caps.authenticatedRoutes, true)
+  assert.equal(status.value.version, '0.4.0')
+})
+
+test('a non-POST request is rejected by the handler', async () => {
+  const h = harness()
+  const definition = h.routes.get(ROUTE_PREFIX + '/status')
+  const req = request({})
+  req.method = 'GET'
+  const res = response()
+  await definition.handler(req, res)
+  assert.equal(res.statusCode, 405)
+  assert.equal(res.headers.allow, 'POST')
 })
 
 test('turn/end completed carries the reply preview when enabled', async () => {
@@ -75,7 +89,7 @@ test('turn/end completed carries the reply preview when enabled', async () => {
   h.emit({ id: SESSION }, {
     type: 'assistant/message',
     seq: 2,
-    data: { content: [{ type: 'text', text: 'The report is ready.' }] },
+    data: { turn: 1, step: 1, message: { content: [{ type: 'text', text: 'The report is ready.' }] }, stream: [] },
   })
   h.emit({ id: SESSION }, {
     type: 'turn/end',
@@ -86,6 +100,14 @@ test('turn/end completed carries the reply preview when enabled', async () => {
   assert.equal(result.ok, true)
   assert.equal(result.value.reason, 'completed')
   assert.equal(result.value.preview, 'The report is ready.')
+})
+
+test('a legacy assistant/message shape still yields a preview', async () => {
+  const h = harness({ content: { ...DEFAULTS.content, replyPreview: true } })
+  h.emit({ id: SESSION }, { type: 'assistant/message', seq: 2, data: { content: [{ type: 'text', text: 'Older shape.' }] } })
+  h.emit({ id: SESSION }, { type: 'turn/end', seq: 3, data: { turn: 1, reason: { kind: 'completed' } } })
+  const result = await call(h, '/turn-end', { sessionId: SESSION })
+  assert.equal(result.value.preview, 'Older shape.')
 })
 
 test('turn/end error carries a safe message', async () => {

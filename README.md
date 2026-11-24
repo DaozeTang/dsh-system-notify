@@ -1,13 +1,13 @@
 <div align="center">
   <img src="icon.svg" width="76" height="76" alt="">
-  <h1>DSH System Notifications</h1>
-  <p>Know when a conversation finishes, waits for approval or authorization, or fails.</p>
+  <h1>System notifications</h1>
+  <p>Know when a DeepSeek Harness conversation finishes, waits for approval or authorization, or fails.</p>
 
   <p>
     <a href="https://github.com/DaozeTang/dsh-system-notify/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/DaozeTang/dsh-system-notify/actions/workflows/ci.yml/badge.svg"></a>
     <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-3DA639.svg"></a>
-    <img alt="DSH 0.2.x" src="https://img.shields.io/badge/DSH-0.2.x-4176E6.svg">
-    <img alt="Node >=20" src="https://img.shields.io/badge/node-%3E%3D20-339933.svg">
+    <img alt="DSH 0.2.3+" src="https://img.shields.io/badge/DSH-0.2.3%2B-4176E6.svg">
+    <img alt="Node >=24.22.3" src="https://img.shields.io/badge/node-%3E%3D24.22.3-339933.svg">
   </p>
 
   <p><a href="README.zh.md">中文</a> · English</p>
@@ -25,10 +25,10 @@ problem is that "something else" is usually another window, and the moment that
 needs you is easy to miss: the turn finished, a tool is waiting for approval, a
 plan needs confirmation, or the turn failed.
 
-`dsh-system-notify` bridges that gap with the operating system notification
-center. It is deliberately quiet: by default it stays silent only while the
-conversation that needs you is the one on screen. Switch conversations, open
-another page, minimize, or leave DSH, and it reaches you.
+`dsh-system-notify` (System notifications) bridges that gap with the operating
+system notification center. It is deliberately quiet: by default it stays silent
+only while the conversation that needs you is the one on screen. Switch
+conversations, open another page, minimize, or leave DSH, and it reaches you.
 
 ## Features
 
@@ -42,14 +42,14 @@ another page, minimize, or leave DSH, and it reaches you.
   Approving still happens in DSH's own approval card.
 - **Quiet by default** — no reply content unless you opt in, completion events
   are grouped, and repeated errors are throttled.
-- **Native settings section** — lives in **Settings → Notifications**, using
-  DSH's design tokens and native switch and card language.
+- **Native settings section** — lives in **Settings → System notifications**,
+  using DSH's design tokens and native switch and card language.
 - **Local only** — no network requests, no telemetry, no session-log writes, no
   model-facing tools.
 
 ## Install
 
-Requirements: DSH `>=0.2.1-rc.2 <1.0.0`. For development, Node.js 20 or newer.
+Requirements: DSH `^0.2.3-alpha.2`. For development, Node.js 24.22.3 or newer.
 
 ### From GitHub
 
@@ -89,20 +89,20 @@ Add `"dsh-system-notify"` to `dsh.profile.bundles` as above, then restart DSH.
 
 ### First run
 
-1. Open **Settings → Notifications**.
+1. Open **Settings → System notifications**.
 2. Click **Allow notifications** and allow DSH in the operating system.
    - macOS: System Settings → Notifications → DeepSeek Harness.
    - Web: the browser's site settings for the DSH page.
 3. Click **Send test notification**.
 4. Switch to another conversation, or another app, and let a turn finish.
 
-The plugin follows DSH's display language. English and Chinese are bundled.
+The plugin follows DSH's display language for its copy. English and Chinese are bundled, and the plugin keeps the English name **System notifications** in both.
 
 ## Configuration
 
-Settings → Notifications. Every change saves immediately. The plugin's page on
-the **Plugins** page in the sidebar still handles enabling and uninstalling, but
-the preferences live in this settings section.
+Settings → System notifications. Every change saves immediately. The same page
+also appears on the plugin's row on the **Plugins** page, which handles enabling
+and uninstalling; the preferences live in this settings section.
 
 | Group | Setting | Default |
 | --- | --- | --- |
@@ -133,9 +133,10 @@ sending; events that could not notify are never queued for later.
 
 The Host half listens to `session/event` and keeps the latest `turn/end` reason
 in memory, so "finished", "stopped", "blocked", and "failed" are distinguishable
-without reading history. The Browser half listens to session status and pending
-interactions, applies the focus and current-conversation gate, and displays the
-notification.
+without reading history. The Browser half injects `sessions`, `uiSession`, and
+`remote`, follows `uiSession.pendingInteractions` and the `api-session/status`
+events, applies the focus and current-conversation gate, and displays the
+notification. The Host routes are admitted by DSH's Web authentication.
 
 See [Design](docs/DESIGN.md) for the event model, architecture, and tradeoffs.
 
@@ -149,10 +150,10 @@ See [Design](docs/DESIGN.md) for the event model, architecture, and tradeoffs.
 
 ## Compatibility
 
-- DSH `0.2.1-rc.2` through `0.3.x` (currently tested on `0.2.2-rc.5`).
+- DSH `^0.2.3-alpha.2` (currently tested on `0.2.3-alpha.2`).
 - Desktop app and browser UI. Desktop notifications use the system notification
   center; the web UI uses the browser's notification permission.
-- Node.js 20+ is required only for development and tests.
+- Node.js 24.22.3+ is required by the DSH release this version targets.
 - Multiple connected clients evaluate focus and the open conversation
   independently; two clients viewing another conversation can both notify. This
   is a known v1 limitation.

@@ -1,6 +1,6 @@
 {
   "name": "dsh-system-notify",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "System notifications for DeepSeek Harness when a conversation finishes, waits for approval or authorization, or fails.",
   "type": "module",
   "license": "MIT",
@@ -23,8 +23,8 @@
     "macos"
   ],
   "engines": {
-    "node": ">=20",
-    "dsh": ">=0.2.1-rc.2 <1.0.0"
+    "node": ">=24.22.3",
+    "dsh": "^0.2.3-alpha.2"
   },
   "publishConfig": {
     "access": "public"
@@ -64,11 +64,13 @@
       "platform": "web",
       "immediately": true,
       "inject": [
+        "@deepseek-ai/dsh-api-remotes",
+        "@deepseek-ai/dsh-api-session-controller",
         "@deepseek-ai/dsh-client-locale",
         "@deepseek-ai/dsh-client-ui-renderer",
         "@deepseek-ai/dsh-client-ui-session",
-        "@deepseek-ai/dsh-client-ui-workspace",
-        "@deepseek-ai/dsh-client-ui-plugin-manager"
+        "@deepseek-ai/dsh-client-ui-settings",
+        "@deepseek-ai/dsh-client-ui-workspace"
       ]
     }
   }
